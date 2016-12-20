@@ -18,5 +18,4 @@ class Measurement:
         mlp = self.model.fit(train_x, train_y)
         scores = self.model.score(test_x, test_y)
         print("Model trained")
-        print("Accuracy: %0.2f (+/- %0.2f)" % (scores, 0.01))
         return mlp

@@ -1,7 +1,11 @@
+from FeatureMaker.Features import Features
+from QualityAndLearn.QualityMesure import Measurement
+
 __author__ = 'DmitriyBrosalin'
 from sknn.mlp import Classifier, Layer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 
 
 class MLP:
@@ -16,15 +20,13 @@ class MLP:
             Layer(name="Input Layer", type="Sigmoid",
                   units=self.amount_of_features),
             Layer(name="Hidden Layer 1", type="Sigmoid",
-                  units=self.amount_of_features * 3, dropout=0.6),
-            Layer(name="Hidden Layer 2", type="Sigmoid",
-                  units=self.amount_of_features * 2, dropout=0.6),
-            Layer(name="Hidden Layer 3", type="Sigmoid",
-                  units=self.amount_of_features, dropout=0.4),
-            Layer(name="Hidden Layer 4", type="Sigmoid",
-                  units=self.amount_of_features / 2, dropout=0.4),
-            Layer(name="Hidden Layer 5", type="Sigmoid",
-                  units=self.amount_of_features / 4, dropout=0.25),
+                  units=self.amount_of_features * 4, dropout=0.5),
+            Layer(name="Hidden Layer 1", type="Sigmoid",
+                  units=self.amount_of_features * 2, dropout=0.3),
+            Layer(name="Hidden Layer 1", type="Sigmoid",
+                  units=self.amount_of_features, dropout=0.3),
+            Layer(name="Hidden Layer 1", type="Sigmoid",
+                  units=self.amount_of_features / 4, dropout=0.3),
             Layer(name="Output", type="Softmax", units=2)
         ]
         print("Layers built successfully")
@@ -39,3 +41,23 @@ class MLP:
             ('neural network', Classifier(layers=layers, learning_rule='nesterov'))])
         print("Network built successfully")
         return pipeline
+
+    def train_mlp(self, model):
+        features_me = Features(
+            "/Users/DmitriyBrosalin/Interesting/SpeechRecognition/Train_Me"
+        ).create_features()
+        features_stranger = Features(
+            "/Users/DmitriyBrosalin/Interesting/SpeechRecognition/Train"
+        ).create_features()
+        stranger_label = np.array([0 for i in range(0, features_stranger.shape[0])])
+        me_labels = np.array([1 for i in range(0, features_me.shape[0])])
+        data_X = np.concatenate((features_stranger, features_me))
+        data_y = np.concatenate((stranger_label, me_labels))
+        quality = Measurement(data_X, data_y, model)
+        quality = quality.train_model()
+        return quality
+
+    def predict_val(self, path_to_file, model):
+        features = Features(path_to_file).create_vector_fetures(path_to_file)
+        prediction = model.predict(features)
+        return prediction
